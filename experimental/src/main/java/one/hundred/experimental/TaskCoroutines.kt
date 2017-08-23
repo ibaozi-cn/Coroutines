@@ -18,12 +18,10 @@ import kotlinx.coroutines.experimental.*
  */
 object TaskCoroutines {
 
-    val listJobs: MutableList<Job> = mutableListOf()
-
     /**
      * 在主线程中顺序执行，会阻塞代码往下执行
      */
-    fun taskOrderOnMainThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking {
+    fun taskBlockOnMainThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking {
         delay(delayTime)
         job()
     }
@@ -31,15 +29,41 @@ object TaskCoroutines {
     /**
      * 在工作线程中顺序执行，会阻塞代码往下执行
      */
-    fun taskOrderOnWorkThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking(CommonPool) {
+    fun taskBlockOnWorkThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking(CommonPool) {
         delay(delayTime)
         job()
     }
 
     /**
      * 并发执行,不会阻塞代码继续执行
+     * 特点带返回值
      */
-    fun <T> taskConcurrent(delayTime: Long = 0, job: suspend () -> T) = async(CommonPool) {
+    fun <T> taskAsync(delayTime: Long = 0, job: suspend () -> T) = async(CommonPool) {
+        delay(delayTime)
+        job()
+    }
+
+    /**
+     * 并发执行,不会阻塞代码继续执行
+     * 特点不带返回值
+     */
+    fun <T> taskLaunch(delayTime: Long = 0, job: suspend () -> T) = launch(CommonPool) {
+        delay(delayTime)
+        job()
+    }
+
+    /**
+     * 顺序执行函数
+     */
+    suspend fun <T> taskOrder(delayTime: Long = 0, job: suspend () -> T) {
+        delay(delayTime)
+        job()
+    }
+
+    /**
+     * 心跳执行 默认重复次数1次
+     */
+    suspend fun <T> taskHeartbeat(times: Int = 1, delayTime: Long = 0, job: suspend () -> T) = repeat(times) {
         delay(delayTime)
         job()
     }

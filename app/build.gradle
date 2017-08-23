@@ -34,3 +34,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.0'
     implementation project(path: ':experimental')
 }
+kotlin {
+    experimental {
+        coroutines "enable"
+    }
+}
