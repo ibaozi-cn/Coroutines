@@ -20,14 +20,7 @@ import kotlinx.coroutines.experimental.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 
-/**
- * 在UI线程中执行，该方法不能作为最外层协程使用，必须运行的suspend 声明的方法内
- * 此方法用于协程上下文调度，目前主要用于切换到android UI线程
- * CoroutineStart.UNDISPATCHED表示立即执行
- */
-fun <T> taskRunOnUiThread(job: suspend () -> T) = launch(UI) {
-    job()
-}
+
 
 /**
  * 将执行调度到Android主UI线程上，并提供本机[延迟] [Delay.delay]支持。

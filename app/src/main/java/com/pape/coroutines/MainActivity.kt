@@ -6,14 +6,13 @@ import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.delay
-import one.hundred.experimental.TaskCoroutines
-import one.hundred.experimental.ui.JobActivity
+import one.hundred.experimental.*
+import one.hundred.experimental.ui.JobLifecycleActivity
 import one.hundred.experimental.ui.onClickStart
-import taskRunOnUiThread
 
-class MainActivity : JobActivity() {
+class MainActivity : JobLifecycleActivity() {
 
-    var count = 0
+    private var count = 0
 
     @SuppressLint("MissingSuperCall")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,24 +32,30 @@ class MainActivity : JobActivity() {
      */
     fun concurrentClick(view: View) {
 
+        clearText()
+
         textView.append("1：并发协程执行开始\n")
 
-        TaskCoroutines.taskAsync(1000) {
+        taskAsync(1000) {
             val threadName = Thread.currentThread().name
             taskRunOnUiThread {
-                textView.append("2：并发协程1=====在线程“$threadName”中执行\n")
+                textView.append("3：并发协程1=====在线程“$threadName”中执行\n")
             }
         }
 
-        TaskCoroutines.taskAsync(3000) {
+        taskAsync(3000) {
             val threadName = Thread.currentThread().name
             taskRunOnUiThread {
-                textView.append("3：并发协程2=====在线程“$threadName”中执行\n")
+                textView.append("4：并发协程2=====在线程“$threadName”中执行\n")
             }
         }
 
-        textView.append("4：并发协程执行不会阻塞当前代码执行\n")
+        textView.append("2：并发协程执行未阻塞执行\n")
 
+    }
+
+    private fun clearText() {
+        textView.text = ""
     }
 
     /**
@@ -58,15 +63,17 @@ class MainActivity : JobActivity() {
      */
     fun orderClick(view: View) {
 
+        clearText()
+
         textView.append("1：顺序协程执行开始\n")
 
-        TaskCoroutines.taskBlockOnMainThread {
-            TaskCoroutines.taskOrder {
+        taskBlockOnMainThread {
+            taskOrder {
                 val threadName = Thread.currentThread().name
                 textView.append("2：顺序协程1=====在线程“$threadName”中执行\n")
             }
 
-            TaskCoroutines.taskOrder {
+            taskOrder {
                 val threadName = Thread.currentThread().name
                 textView.append("3：顺序协程2=====在线程“$threadName”中执行\n")
             }
@@ -81,33 +88,44 @@ class MainActivity : JobActivity() {
      */
     fun buttonWait(view: View) {
 
+        clearText()
+
         textView.append("1：并发协程执行后等待结果开始\n")
 
-        val job1 = TaskCoroutines.taskAsync {
+        val job1 = taskAsync {
             val threadName = Thread.currentThread().name
             taskRunOnUiThread {
-                textView.append("2：并发协程1=====在线程“$threadName”中执行\n")
+                textView.append("3：并发协程1=====在线程“$threadName”中执行\n")
             }
             1
         }
 
-        TaskCoroutines.taskAsync {
+        taskAsync {
             taskRunOnUiThread {
-                textView.append("3：等待执行结果“${job1.await()}”\n")
+                textView.append("4：等待执行结果“${job1.await()}”\n")
             }
         }
 
-        textView.append("4：并发协程执行后等待结果结束\n")
+        textView.append("2：并发协程执行后未阻塞\n")
 
     }
 
+    /**
+     * 执行心跳
+     */
     fun buttonHeart(view: View) {
+
+        clearText()
+
         textView.append("心跳开始\n")
-        TaskCoroutines.taskBlockOnMainThread {
-            //1秒重复1次，一共100次
+
+        taskLaunch {
+            //1秒重复1次，一共10次
             var count = 0
-            TaskCoroutines.taskHeartbeat(100, 1000) {
-                textView.append("心跳${count++}\n")
+            taskHeartbeat(10, 1000) {
+                taskRunOnUiThread {
+                    textView.append("心跳${count++}\n")
+                }
             }
         }
     }
