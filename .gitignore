@@ -53,3 +53,7 @@ google-services.json
 freeline.py
 freeline/
 freeline_project_description.json
+/settings.gradle
+/app/.DS_Store
+/experimental/.DS_Store
+.idea/
