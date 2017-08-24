@@ -67,7 +67,7 @@ class MainActivity : JobLifecycleActivity() {
 
         textView.append("1：顺序协程执行开始\n")
 
-        taskBlockOnMainThread {
+        taskBlockOnWorkThread {
             taskOrder {
                 val threadName = Thread.currentThread().name
                 textView.append("2：顺序协程1=====在线程“$threadName”中执行\n")
@@ -92,18 +92,15 @@ class MainActivity : JobLifecycleActivity() {
 
         textView.append("1：并发协程执行后等待结果开始\n")
 
-        val job1 = taskAsync {
-            val threadName = Thread.currentThread().name
-            taskRunOnUiThread {
-                textView.append("3：并发协程1=====在线程“$threadName”中执行\n")
+        taskRunOnUiThread {
+            val job1 = taskAsync {
+                val threadName = Thread.currentThread().name
+                taskRunOnUiThread {
+                    textView.append("3：并发协程1=====在线程“$threadName”中执行\n")
+                }
+                1
             }
-            1
-        }
-
-        taskAsync {
-            taskRunOnUiThread {
-                textView.append("4：等待执行结果“${job1.await()}”\n")
-            }
+            textView.append("4：等待执行结果“${job1.await()}”\n")
         }
 
         textView.append("2：并发协程执行后未阻塞\n")

@@ -26,6 +26,7 @@ internal var ThreadPool = newFixedThreadPoolContext(Runtime.getRuntime().availab
 
 /**
  * 在主线程中顺序执行，属于顶级协程函数，一般用于最外层
+ * 注意：该函数会阻塞代码继续执行
  */
 inline fun taskBlockOnMainThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking {
     delay(delayTime)
@@ -34,6 +35,7 @@ inline fun taskBlockOnMainThread(delayTime: Long = 0, noinline job:suspend () ->
 
 /**
  * 在工作线程中顺序执行，属于顶级协程函数，一般用于最外层
+ * 注意：该函数会阻塞代码继续执行
  */
 inline fun taskBlockOnWorkThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking(ThreadPool) {
     delay(delayTime)
