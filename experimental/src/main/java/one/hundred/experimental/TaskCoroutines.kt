@@ -17,11 +17,17 @@ import kotlinx.coroutines.experimental.*
  * 1. 同一线程可以有多个协程
  * 2. 同一协程可以运行在不同上下文中 通过runBlocking 包子协程 run 实现 ： runBlocking(ctx1){ run(ctx2){ }  }
  */
+// ---------------------------------------------------------------------------------------------------------------------------
+/**
+ * 根据当前处理器个数，并获得合理的线程池大小，作为异步协程的上下文
+ */
+@PublishedApi
+internal var ThreadPool = newFixedThreadPoolContext(Runtime.getRuntime().availableProcessors() * 2, "ThreadPool")
 
 /**
  * 在主线程中顺序执行，属于顶级协程函数，一般用于最外层
  */
-fun taskBlockOnMainThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking {
+inline fun taskBlockOnMainThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking {
     delay(delayTime)
     job()
 }
@@ -29,7 +35,7 @@ fun taskBlockOnMainThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlo
 /**
  * 在工作线程中顺序执行，属于顶级协程函数，一般用于最外层
  */
-fun taskBlockOnWorkThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlocking(CommonPool) {
+inline fun taskBlockOnWorkThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking(ThreadPool) {
     delay(delayTime)
     job()
 }
@@ -38,7 +44,7 @@ fun taskBlockOnWorkThread(delayTime: Long = 0, job: suspend () -> Unit) = runBlo
  * 并发执行，可以用于最外层
  * 特点带返回值
  */
-fun <T> taskAsync(delayTime: Long = 0, job: suspend () -> T) = async(CommonPool) {
+inline fun <T> taskAsync(delayTime: Long = 0, noinline job:suspend () -> T) = async(ThreadPool) {
     delay(delayTime)
     job()
 }
@@ -47,7 +53,7 @@ fun <T> taskAsync(delayTime: Long = 0, job: suspend () -> T) = async(CommonPool)
  * 并发执行，可以用于最外层
  * 特点不带返回值
  */
-fun <T> taskLaunch(delayTime: Long = 0, job: suspend () -> T) = launch(CommonPool) {
+inline fun <T> taskLaunch(delayTime: Long = 0, noinline job:suspend  () -> T) = launch(ThreadPool) {
     delay(delayTime)
     job()
 }
@@ -57,14 +63,14 @@ fun <T> taskLaunch(delayTime: Long = 0, job: suspend () -> T) = launch(CommonPoo
  * 此方法用于协程上下文调度，目前主要用于切换到android UI线程
  * 参数添加CoroutineStart.UNDISPATCHED的话表示立即执行
  */
-fun <T> taskRunOnUiThread(job: suspend () -> T) = launch(UI) {
+inline fun <T> taskRunOnUiThread(noinline job:suspend  () -> T) = launch(UI) {
     job()
 }
 
 /**
  * 顺序执行函数，不能用于最外层
  */
-suspend fun <T> taskOrder(delayTime: Long = 0, job: suspend () -> T) {
+suspend inline fun <T> taskOrder(delayTime: Long = 0,crossinline job:  () -> T) {
     delay(delayTime)
     job()
 }
@@ -72,7 +78,7 @@ suspend fun <T> taskOrder(delayTime: Long = 0, job: suspend () -> T) {
 /**
  * 心跳执行 默认重复次数1次，不能用于最外层
  */
-suspend fun <T> taskHeartbeat(times: Int = 1, delayTime: Long = 0, job: suspend () -> T) = repeat(times) {
+suspend inline fun <T> taskHeartbeat(times: Int = 1, delayTime: Long = 0,crossinline job:  () -> T) = repeat(times) {
     delay(delayTime)
     job()
 }

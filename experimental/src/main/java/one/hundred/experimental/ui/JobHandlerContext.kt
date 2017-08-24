@@ -20,8 +20,6 @@ import kotlinx.coroutines.experimental.*
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.experimental.CoroutineContext
 
-
-
 /**
  * 将执行调度到Android主UI线程上，并提供本机[延迟] [Delay.delay]支持。
  */
