@@ -2,6 +2,8 @@ package one.hundred.experimental
 
 import UI
 import kotlinx.coroutines.experimental.*
+import java.lang.ref.WeakReference
+import java.util.*
 
 
 /**
@@ -26,6 +28,7 @@ internal var ThreadPool = newFixedThreadPoolContext(Runtime.getRuntime().availab
 
 /**
  * 在主线程中顺序执行，属于顶级协程函数，一般用于最外层
+ *
  * 注意：该函数会阻塞代码继续执行
  */
 inline fun taskBlockOnMainThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking {
@@ -35,6 +38,7 @@ inline fun taskBlockOnMainThread(delayTime: Long = 0, noinline job:suspend () ->
 
 /**
  * 在工作线程中顺序执行，属于顶级协程函数，一般用于最外层
+ *
  * 注意：该函数会阻塞代码继续执行
  */
 inline fun taskBlockOnWorkThread(delayTime: Long = 0, noinline job:suspend () -> Unit) = runBlocking(ThreadPool) {
@@ -43,16 +47,15 @@ inline fun taskBlockOnWorkThread(delayTime: Long = 0, noinline job:suspend () ->
 }
 
 /**
- * 并发执行，可以用于最外层
+ * 并发执行，常用于最外层
  * 特点带返回值
  */
 inline fun <T> taskAsync(delayTime: Long = 0, noinline job:suspend () -> T) = async(ThreadPool) {
     delay(delayTime)
     job()
 }
-
 /**
- * 并发执行，可以用于最外层
+ * 并发执行，常用于最外层
  * 特点不带返回值
  */
 inline fun <T> taskLaunch(delayTime: Long = 0, noinline job:suspend  () -> T) = launch(ThreadPool) {

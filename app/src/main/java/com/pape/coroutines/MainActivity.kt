@@ -104,7 +104,6 @@ class MainActivity : JobLifecycleActivity() {
         }
 
         textView.append("2：并发协程执行后未阻塞\n")
-
     }
 
     /**
