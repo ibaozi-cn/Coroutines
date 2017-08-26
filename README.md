@@ -1,6 +1,10 @@
 # Coroutines
 ![image](https://github.com/Papeone/Coroutines/raw/master/image/coroutines.jpg)
 ## 更新日志
+### 8月26号
+    优化代码：
+        1.添加弱引用例子，解决协程会导致的内存泄露问题
+
 ### 8月24号
     优化代码： 
         1. 添加合理的线程池 为协程作为上下文 
