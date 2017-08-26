@@ -25,6 +25,7 @@ class MainActivity : JobLifecycleActivity() {
             delay(3000) //三秒内的点击只有第一次有效
             Log.d("onClickStart", "onClickStart${count++}")
         }
+        testWeakRef()
     }
 
     /**
@@ -125,4 +126,31 @@ class MainActivity : JobLifecycleActivity() {
             }
         }
     }
+
+
+    fun testWeakRef() {
+        //初始化弱引用
+        val weakRef = this.weakReference()
+        var result = "0"
+
+        taskRunOnUiThread {
+            taskAsync {
+                var count = 20
+                taskHeartbeat(20, 1000) {
+                    //倒计时20秒
+                    Log.d("showData", "倒计时==============================${count--}")
+                }
+            }
+            //延迟20秒去调用activity的方法showData()
+            taskOrder(20000) {
+                result = "101000"
+            }
+            weakRef().showData(result)
+        }
+    }
+
+    fun showData(str: String) {
+        Log.d("showData", "data==============================" + str)
+    }
+
 }
